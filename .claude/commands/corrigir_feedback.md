@@ -42,8 +42,3 @@ Com base nos feedbacks informados:
 
 Antes de iniciar, instale as dependências:
 pip install openpyxl python-docx -q --user
-```
-
-Salva como `.claude/commands/corrigir_feedback.md` e usa assim:
-```
-/corrigir_feedback
