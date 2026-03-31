@@ -1,9 +1,9 @@
-# 📘 Playbook Completo — Claude Code + Qlik Sense
+#  Playbook Completo — Claude Code + Qlik Sense
 ## BIX Tecnologia | Guia de Configuração e Uso
 
 ---
 
-## 🎯 Objetivo
+##  Objetivo
 
 Este playbook documenta **tudo** que foi construído e configurado para transformar o Claude Code em um copiloto completo de desenvolvimento de projetos BI com Qlik Sense na BIX Tecnologia.
 
@@ -11,7 +11,7 @@ Cobre desde a instalação do ambiente até a entrega final do projeto, incluind
 
 ---
 
-## 📋 Índice
+##  Índice
 
 1. [Pré-requisitos e Instalação](#1-pré-requisitos-e-instalação)
 2. [Criação do Projeto e Git](#2-criação-do-projeto-e-git)
@@ -348,7 +348,7 @@ gen_pptx.py
 venv/
 ```
 
-> ✅ A pasta `.claude/commands/` e `.claude/skills/` DEVEM ser versionadas.
+>  A pasta `.claude/commands/` e `.claude/skills/` DEVEM ser versionadas.
 
 ---
 
@@ -388,7 +388,7 @@ claude
 
 Resultado esperado:
 ```
-claude.ai Figma · ✔ connected
+claude.ai Figma ·  connected
 Status: connected
 Tools: 15 tools
 ```
@@ -602,14 +602,14 @@ Skills ficam em `.claude/skills/[nome]/SKILL.md` e são guias de boas práticas 
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│           ETAPA 1 — NOVO PROJETO                        │
+│           ETAPA 1 - NOVO PROJETO                        │
 │  Criar repo GitHub → Git clone → /novo_projeto          │
 │  → 6 templates Excel gerados em Documentacao/           │
 └─────────────────────────┬───────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│           ETAPA 2 — LEVANTAMENTO (você faz)             │
+│           ETAPA 2 - LEVANTAMENTO (você faz)             │
 │  Entrevistar usuário de negócio usando os templates     │
 │  → Preencher os 6 xlsx com:                             │
 │    - Requisitos, KPIs, campos, riscos, cronograma       │
@@ -618,7 +618,7 @@ Skills ficam em `.claude/skills/[nome]/SKILL.md` e são guias de boas práticas 
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│           ETAPA 3 — DESENVOLVIMENTO                     │
+│           ETAPA 3 - DESENVOLVIMENTO                     │
 │  /iniciar_desev_qlik                                    │
 │  → DDL + Mermaid (modelo estrela)                       │
 │  → 7+ scripts .inc de extração                          │
@@ -743,7 +743,7 @@ CASE WHEN a < b THEN a ELSE b END
 
 ### 12.1 Scripts Qlik
 
-| ✅ Correto | ❌ Errado |
+|  Correto |  Errado |
 |-----------|----------|
 | Extensão `.inc` | Extensão `.qvs` |
 | `ApplyMap` para enriquecer | `JOIN` direto |
@@ -884,7 +884,7 @@ chore: tarefas de manutenção
 - Controle total sobre cardinalidade
 
 ```qlik
-//  Correto — sem chave sintética
+//  Correto  sem chave sintética
 MAP_Regiao:
 MAPPING LOAD ID_Consultor, Regiao RESIDENT dim_consultor;
 
@@ -892,7 +892,7 @@ fato_vendas_final:
 LOAD *, ApplyMap('MAP_Regiao', ID_Consultor, 'N/A') AS Regiao
 RESIDENT fato_vendas;
 
-//  Errado — pode criar chave sintética
+//  Errado  pode criar chave sintética
 JOIN (fato_vendas)
 LOAD ID_Consultor, Regiao RESIDENT dim_consultor;
 ```
