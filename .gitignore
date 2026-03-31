@@ -1,0 +1,40 @@
+# ── Claude Code ───────────────────────────────────────
+.claude/
+
+# ── Credenciais e conexões ─────────────────────────────
+*.env
+.env*
+secrets.json
+credentials.json
+config/credentials.*
+**/config/conexao.inc        # contém string de conexão ao BD
+**/config/*.pwd
+**/config/*.key
+
+# ── QVDs (dados extraídos do ERP) ─────────────────────
+**/QVDs/
+*.qvd
+
+# ── Arquivos Office com dados reais ───────────────────
+# Manter apenas templates — ignorar se houver dados reais exportados
+**/exports/
+**/output/
+relatorio_exportado*.xlsx
+dados_reais*.xlsx
+
+# ── Logs e temporários ────────────────────────────────
+*.log
+*.tmp
+*.bak
+__pycache__/
+*.pyc
+*.pyo
+
+# ── Scripts gerados temporariamente ───────────────────
+gerar_docs.py
+gen_pptx.py
+
+# ── Variáveis de ambiente de ferramentas ──────────────
+.venv/
+venv/
+*.egg-info/

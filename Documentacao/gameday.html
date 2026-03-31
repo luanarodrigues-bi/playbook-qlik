@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Day — Performance Comercial</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --azul-escuro:  #0D2B55;
+      --azul-medio:   #1A4A8A;
+      --azul-claro:   #2E7DD6;
+      --azul-destaque:#4DA3FF;
+      --branco:       #FFFFFF;
+      --cinza-claro:  #F4F7FC;
+      --cinza-texto:  #6B7A99;
+      --verde:        #22C55E;
+      --amarelo:      #F59E0B;
+      --vermelho:     #EF4444;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #E8EEF7;
+      color: var(--azul-escuro);
+    }
+
+    /* ── Navegação de slides ──────────────────────────────── */
+    .nav {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 100;
+      background: rgba(13,43,85,0.85);
+      padding: 8px 16px;
+      border-radius: 32px;
+      backdrop-filter: blur(6px);
+    }
+    .nav button {
+      background: transparent;
+      border: 1.5px solid var(--azul-destaque);
+      color: var(--branco);
+      padding: 6px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+    .nav button:hover { background: var(--azul-claro); }
+    .nav .counter {
+      color: var(--azul-destaque);
+      font-size: 13px;
+      line-height: 30px;
+      min-width: 64px;
+      text-align: center;
+    }
+
+    /* ── Slide base ──────────────────────────────────────── */
+    .slide {
+      display: none;
+      min-height: 100vh;
+      padding: 0;
+    }
+    .slide.active { display: flex; flex-direction: column; }
+
+    /* ── Capa (Slide 1) ──────────────────────────────────── */
+    #slide-1 {
+      background: linear-gradient(140deg, var(--azul-escuro) 60%, var(--azul-medio));
+      color: var(--branco);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #slide-1::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(77,163,255,0.15) 0%, transparent 70%);
+      top: -100px; right: -100px;
+      border-radius: 50%;
+    }
+    .capa-logo {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--azul-destaque);
+      margin-bottom: 20px;
+    }
+    .capa-title {
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .capa-sub {
+      font-size: 20px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 48px;
+    }
+    .capa-tags {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .tag {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 6px 18px;
+      font-size: 13px;
+      color: var(--azul-destaque);
+    }
+    .capa-date {
+      position: absolute;
+      bottom: 32px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* ── Slides de conteúdo ──────────────────────────────── */
+    .slide-header {
+      background: var(--azul-escuro);
+      color: var(--branco);
+      padding: 32px 64px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .slide-num {
+      background: var(--azul-claro);
+      color: var(--branco);
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 3px 10px;
+      letter-spacing: 1px;
+    }
+    .slide-header h2 {
+      font-size: 26px;
+      font-weight: 700;
+    }
+    .slide-header p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 2px;
+    }
+
+    .slide-body {
+      flex: 1;
+      background: var(--cinza-claro);
+      padding: 48px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* ── Cards e grids ───────────────────────────────────── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    .card {
+      background: var(--branco);
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(13,43,85,0.08);
+      border-top: 4px solid var(--azul-claro);
+    }
+    .card.verde  { border-top-color: var(--verde); }
+    .card.amarelo { border-top-color: var(--amarelo); }
+    .card.vermelho { border-top-color: var(--vermelho); }
+
+    .card h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--cinza-texto);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .card p {
+      font-size: 15px;
+      color: var(--azul-escuro);
+      line-height: 1.6;
+    }
+    .card .big-num {
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--azul-escuro);
+      line-height: 1;
+    }
+    .card .sub-num {
+      font-size: 13px;
+      color: var(--cinza-texto);
+      margin-top: 4px;
+    }
+
+    /* ── KPI strip ───────────────────────────────────────── */
+    .kpi-strip {
+      background: var(--azul-escuro);
+      border-radius: 12px;
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-around;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .kpi-item { text-align: center; color: var(--branco); }
+    .kpi-item .kpi-val {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--azul-destaque);
+      display: block;
+    }
+    .kpi-item .kpi-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* ── Tabela de indicadores ───────────────────────────── */
+    table.ind {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--branco);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(13,43,85,0.06);
+    }
+    table.ind thead { background: var(--azul-escuro); color: var(--branco); }
+    table.ind th {
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-align: left;
+    }
+    table.ind td {
+      padding: 11px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid #E8EEF7;
+      color: var(--azul-escuro);
+    }
+    table.ind tr:last-child td { border-bottom: none; }
+    table.ind tr:hover td { background: var(--cinza-claro); }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge.ok       { background: #DCFCE7; color: #166534; }
+    .badge.parcial  { background: #FEF9C3; color: #854D0E; }
+    .badge.pendente { background: #FEE2E2; color: #991B1B; }
+
+    /* ── Arquitetura ─────────────────────────────────────── */
+    .arch {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 8px 0;
+    }
+    .arch-box {
+      background: var(--branco);
+      border: 2px solid var(--azul-claro);
+      border-radius: 10px;
+      padding: 16px 22px;
+      text-align: center;
+      min-width: 130px;
+    }
+    .arch-box .arch-icon { font-size: 24px; }
+    .arch-box .arch-label { font-size: 12px; font-weight: 700; color: var(--azul-escuro); margin-top: 4px; }
+    .arch-box .arch-sub   { font-size: 10px; color: var(--cinza-texto); }
+    .arch-arrow {
+      font-size: 22px;
+      color: var(--azul-claro);
+      padding: 0 8px;
+      font-weight: 700;
+    }
+
+    /* ── Screenshot placeholder ──────────────────────────── */
+    .screenshot-area {
+      background: var(--branco);
+      border: 2px dashed #B8CCEB;
+      border-radius: 12px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--cinza-texto);
+      min-height: 200px;
+    }
+    .screenshot-area .ph-icon { font-size: 36px; }
+    .screenshot-area .ph-label { font-size: 14px; font-weight: 600; }
+    .screenshot-area .ph-sub   { font-size: 12px; }
+
+    /* ── Próximos passos ─────────────────────────────────── */
+    .steps-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .steps-list li {
+      background: var(--branco);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 1px 6px rgba(13,43,85,0.06);
+    }
+    .step-num {
+      background: var(--azul-claro);
+      color: var(--branco);
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
+    }
+    .step-text { font-size: 14px; color: var(--azul-escuro); }
+    .step-owner { margin-left: auto; font-size: 11px; color: var(--cinza-texto); white-space: nowrap; }
+
+    /* ── Slide final ─────────────────────────────────────── */
+    #slide-final {
+      background: linear-gradient(140deg, var(--azul-escuro) 60%, var(--azul-medio));
+      color: var(--branco);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    #slide-final h2 { font-size: 44px; font-weight: 800; margin-bottom: 16px; }
+    #slide-final p  { font-size: 18px; color: rgba(255,255,255,0.7); max-width: 540px; }
+
+    @media print {
+      .nav { display: none; }
+      .slide { display: flex !important; page-break-after: always; min-height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  SLIDE 1 — CAPA                                  ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<section class="slide active" id="slide-1">
+  <div class="capa-logo">Performance Analytics · Qlik Sense</div>
+  <div class="capa-title">Performance<br/>Comercial</div>
+  <div class="capa-sub">Painel de Monitoramento da Equipe de Vendas</div>
+  <div class="capa-tags">
+    <span class="tag">ERP Protheus</span>
+    <span class="tag">SQL Server</span>
+    <span class="tag">Qlik Sense</span>
+    <span class="tag">20 Indicadores</span>
+    <span class="tag">Refresh Diário</span>
+  </div>
+  <div class="capa-date">Entrega: 31 de março de 2026</div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  SLIDE 2 — OBJETIVO DO PROJETO                   ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<section class="slide" id="slide-2">
+  <div class="slide-header">
+    <div>
+      <span class="slide-num">01</span>
+      <h2>Objetivo do Projeto</h2>
+      <p>O desafio e a solução</p>
+    </div>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2">
+      <div class="card vermelho">
+        <h3>⚠ Problema Identificado</h3>
+        <p>
+          A equipe comercial consolidava a performance manualmente em Excel
+          <strong>toda segunda-feira</strong>, com dados desatualizados, sujeitos
+          a erro humano e sem visão de hierarquia (consultor × gerência × diretoria).
+        </p>
+        <br/>
+        <p>Sem visibilidade diária → decisões tardias → perda de oportunidades.</p>
+      </div>
+      <div class="card verde">
+        <h3>✓ Solução Entregue</h3>
+        <p>
+          Dashboard em <strong>Qlik Sense</strong> com dados do ERP Protheus,
+          atualizado automaticamente <strong>todo dia às 6h</strong>, com
+          controle de acesso por perfil (consultor, gerente, diretor) e
+          20 indicadores de performance validados com o negócio.
+        </p>
+      </div>
+    </div>
+    <div class="kpi-strip">
+      <div class="kpi-item">
+        <span class="kpi-val">20</span>
+        <span class="kpi-label">Indicadores</span>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-val">4</span>
+        <span class="kpi-label">Sheets</span>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-val">24</span>
+        <span class="kpi-label">Meses de Histórico</span>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-val">06h</span>
+        <span class="kpi-label">Refresh Diário</span>
+      </div>
+      <div class="kpi-item">
+        <span class="kpi-val">3</span>
+        <span class="kpi-label">Perfis de Acesso</span>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <h3>Público</h3>
+        <p>Diretores Comerciais, Gerentes Regionais e Consultores de Vendas</p>
+      </div>
+      <div class="card">
+        <h3>Fonte de Dados</h3>
+        <p>ERP Protheus (SQL Server) + Planilha de Metas</p>
+      </div>
+      <div class="card">
+        <h3>Plataforma</h3>
+        <p>Qlik Sense Cloud — acesso via browser, sem instalação</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  SLIDE 3 — SOLUÇÃO ENTREGUE (SHEETS)             ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<section class="slide" id="slide-3">
+  <div class="slide-header">
+    <div>
+      <span class="slide-num">02</span>
+      <h2>Solução Entregue</h2>
+      <p>Estrutura do app — 4 sheets com fluxo estratégico ao micro</p>
+    </div>
+  </div>
+  <div class="slide-body">
+    <div class="grid-2">
+
+      <div class="card">
+        <h3>📊 Sheet 01 — Visão Executiva</h3>
+        <p><strong>Para:</strong> Diretor e Gerente Comercial</p>
+        <p><strong>Responde:</strong> Estamos atingindo a meta?</p>
+        <br/>
+        <p>Faturamento Realizado · Meta · % Atingimento · Margem de Contribuição
+        · Crescimento MoM · Crescimento YoY · Qtd de Pedidos</p>
+        <br/>
+        <div class="screenshot-area">
+          <div class="ph-icon">🖼</div>
+          <div class="ph-label">Print da Sheet 01</div>
+          <div class="ph-sub">Inserir screenshot do painel aqui</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>👥 Sheet 02 — Performance Comercial</h3>
+        <p><strong>Para:</strong> Gerente Comercial e Regional</p>
+        <p><strong>Responde:</strong> Quem e onde performam melhor?</p>
+        <br/>
+        <p>Faturamento por Região · Ranking de Consultores
+        · % Atingimento por Consultor · Taxa de Conversão · Ticket Médio</p>
+        <br/>
+        <div class="screenshot-area">
+          <div class="ph-icon">🖼</div>
+          <div class="ph-label">Print da Sheet 02</div>
+          <div class="ph-sub">Inserir screenshot do painel aqui</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📦 Sheet 03 — Análise de Produtos</h3>
+        <p><strong>Para:</strong> Analista de BI e Gerente de Produto</p>
+        <p><strong>Responde:</strong> O que e por qual canal vendemos?</p>
+        <br/>
+        <p>Faturamento por Produto · Faturamento por Canal
+        · % Desconto Médio · Margem de Contribuição · Tabela detalhada</p>
+        <br/>
+        <div class="screenshot-area">
+          <div class="ph-icon">🖼</div>
+          <div class="ph-label">Print da Sheet 03</div>
+          <div class="ph-sub">Inserir screenshot do painel aqui</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>💰 Sheet 04 — Financeiro</h3>
+        <p><strong>Para:</strong> Financeiro e Diretor</p>
+        <p><strong>Responde:</strong> A saúde financeira está ok?</p>
+        <br/>
+        <p>Inadimplência · Prazo Médio de Pagamento
+        · Clientes Ativos · Novos Clientes · Clientes Inativos</p>
+        <br/>
+        <div class="screenshot-area">
+          <div class="ph-icon">🖼</div>
+          <div class="ph-label">Print da Sheet 04</div>
+          <div class="ph-sub">Inserir screenshot do painel aqui</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  SLIDE 4 — INDICADORES                           ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<section class="slide" id="slide-4">
+  <div class="slide-header">
+    <div>
+      <span class="slide-num">03</span>
+      <h2>Indicadores Entregues</h2>
+      <p>20 KPIs e métricas de performance validados com o negócio</p>
+    </div>
+  </div>
+  <div class="slide-body">
+    <table class="ind">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Indicador</th>
+          <th>Regra de Cálculo</th>
+          <th>Unidade</th>
+          <th>Meta</th>
+          <th>Sheet</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Faturamento Realizado</td><td>SUM(Valor_Venda)</td><td>R$</td><td>Por consultor/mês</td><td>01, 02</td></tr>
+        <tr><td>2</td><td>Meta de Faturamento</td><td>SUM(Valor_Meta)</td><td>R$</td><td>Definida no início do mês</td><td>01</td></tr>
+        <tr><td>3</td><td>% Atingimento de Meta</td><td>Faturamento / Meta</td><td>%</td><td>100%</td><td>01, 02</td></tr>
+        <tr><td>4</td><td>Ticket Médio</td><td>SUM(Valor_Venda) / COUNT(Pedidos)</td><td>R$</td><td>A definir</td><td>02</td></tr>
+        <tr><td>5</td><td>Taxa de Conversão</td><td>COUNT(Fechados) / COUNT(Total)</td><td>%</td><td>A definir</td><td>02</td></tr>
+        <tr><td>6</td><td>Inadimplência</td><td>SUM(Atraso) / SUM(Total)</td><td>%</td><td>&lt; 5%</td><td>04</td></tr>
+        <tr><td>7</td><td>Qtd de Pedidos</td><td>COUNT(ID_Pedido)</td><td>un</td><td>Por região</td><td>01</td></tr>
+        <tr><td>8</td><td>Faturamento por Região</td><td>SUM(Valor_Venda) GROUP BY Regiao</td><td>R$</td><td>Por consultor</td><td>02</td></tr>
+        <tr><td>9</td><td>Faturamento por Consultor</td><td>SUM(Valor_Venda) GROUP BY Consultor</td><td>R$</td><td>A definir</td><td>02</td></tr>
+        <tr><td>10</td><td>Faturamento por Produto</td><td>SUM(Valor_Venda) GROUP BY Produto</td><td>R$</td><td>A definir</td><td>03</td></tr>
+        <tr><td>11</td><td>Faturamento por Canal</td><td>SUM(Valor_Venda) GROUP BY Canal_Venda</td><td>R$</td><td>Positivo</td><td>03</td></tr>
+        <tr><td>12</td><td>Crescimento MoM</td><td>(Mês Atual - Mês Ant.) / Mês Ant.</td><td>%</td><td>Positivo</td><td>01</td></tr>
+        <tr><td>13</td><td>Crescimento YoY</td><td>(Ano Atual - Ano Ant.) / Ano Ant.</td><td>%</td><td>A definir</td><td>01</td></tr>
+        <tr><td>14</td><td>Qtd Clientes Ativos</td><td>COUNT(DISTINCT clientes com venda)</td><td>un</td><td>A definir</td><td>04</td></tr>
+        <tr><td>15</td><td>Novos Clientes</td><td>COUNT(1ª compra no mês)</td><td>un</td><td>A definir</td><td>04</td></tr>
+        <tr><td>16</td><td>Clientes Inativos</td><td>COUNT(última compra &gt; 90 dias)</td><td>un</td><td>0</td><td>04</td></tr>
+        <tr><td>17</td><td>Prazo Médio de Pagamento</td><td>AVG(Pagamento - Vencimento)</td><td>dias</td><td>&lt; 30 dias</td><td>04</td></tr>
+        <tr><td>18</td><td>Valor Médio por Pedido</td><td>SUM(Valor_Venda) / COUNT(Pedidos)</td><td>R$</td><td>A definir</td><td>03</td></tr>
+        <tr><td>19</td><td>% Desconto Médio</td><td>SUM(Desconto) / SUM(Valor_Bruto)</td><td>%</td><td>&lt; 10%</td><td>03</td></tr>
+        <tr><td>20</td><td>Margem de Contribuição</td><td>SUM(Venda - Custo) / SUM(Venda)</td><td>%</td><td>&gt; 30%</td><td>01, 03</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  SLIDE 5 — ARQUITETURA DE DADOS                  ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<section class="slide" id="slide-5">
+  <div class="slide-header">
+    <div>
+      <span class="slide-num">04</span>
+      <h2>Arquitetura de Dados</h2>
+      <p>Fluxo da extração ao painel — padrão QVD em duas camadas</p>
+    </div>
+  </div>
+  <div class="slide-body">
+
+    <div class="arch">
+      <div class="arch-box">
+        <div class="arch-icon">🗄</div>
+        <div class="arch-label">ERP Protheus</div>
+        <div class="arch-sub">SQL Server</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-icon">📂</div>
+        <div class="arch-label">Extração</div>
+        <div class="arch-sub">7 scripts .inc<br/>QVDs brutos</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-icon">⚙</div>
+        <div class="arch-label">Transformação</div>
+        <div class="arch-sub">3 scripts .inc<br/>QVDs enriquecidos</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-icon">📊</div>
+        <div class="arch-label">App Qlik Sense</div>
+        <div class="arch-sub">4 sheets<br/>20 indicadores</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-icon">👤</div>
+        <div class="arch-label">Usuário</div>
+        <div class="arch-sub">Browser<br/>Section Access</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <h3>🗂 Modelo Estrela</h3>
+        <p>
+          <strong>4 dimensões:</strong> Tempo, Cliente, Consultor, Produto<br/>
+          <strong>3 fatos:</strong> Vendas, Financeiro, Metas<br/>
+          Sem chaves sintéticas — ApplyMap em todas as transformações
+        </p>
+      </div>
+      <div class="card">
+        <h3>⚡ Performance</h3>
+        <p>
+          QVDs em duas camadas (Extração + Transformação)<br/>
+          Histórico limitado a <strong>24 meses</strong><br/>
+          Índices no SQL Server para todas as FKs<br/>
+          ApplyMap evita JOINs lentos
+        </p>
+      </div>
+      <div class="card">
+        <h3>🔐 Controle de Acesso</h3>
+        <p>
+          <strong>Section Access</strong> por perfil:<br/>
+          — Consultor: vê apenas os próprios dados<br/>
+          — Gerente Regional: vê sua gerência<br/>
+          — Diretor: visibilidade total
+        </p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>QVDs de Extração (camada bruta)</h3>
+        <p style="font-family:monospace;font-size:12px;line-height:1.8;color:#1A4A8A">
+          dim_cliente.qvd &nbsp;|&nbsp; dim_consultor.qvd<br/>
+          dim_produto.qvd &nbsp;|&nbsp; dim_tempo.qvd<br/>
+          fato_vendas.qvd &nbsp;|&nbsp; fato_financeiro.qvd<br/>
+          fato_metas.qvd
+        </p>
+      </div>
+      <div class="card">
+        <h3>QVDs de Transformação (camada enriquecida)</h3>
+        <p style="font-family:monospace;font-size:12px;line-height:1.8;color:#1A4A8A">
+          fato_vendas_final.qvd<br/>
+          resumo_faturamento_mensal.qvd<br/>
+          fato_financeiro_enriched.qvd<br/>
+          dim_cliente_enriched.qvd<br/>
+          fato_metas_enriched.qvd<br/>
+          resumo_metas_gerencia.qvd
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  SLIDE 6 — STATUS DA VALIDAÇÃO                   ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<section class="slide" id="slide-6">
+  <div class="slide-header">
+    <div>
+      <span class="slide-num">05</span>
+      <h2>Status da Validação Técnica</h2>
+      <p>Checklist atualizado em 31/03/2026 — Nota: 5,0/10</p>
+    </div>
+  </div>
+  <div class="slide-body">
+    <table class="ind">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fase</th>
+          <th>Item</th>
+          <th>Status</th>
+          <th>Observação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Extração</td><td>Conexão com a fonte validada</td><td><span class="badge parcial">Parcial</span></td><td>conexao.inc criado — validar credenciais reais</td></tr>
+        <tr><td>2</td><td>Extração</td><td>Volume de registros conferido</td><td><span class="badge pendente">Pendente</span></td><td>Executar após popular banco SQL Server</td></tr>
+        <tr><td>3</td><td>Extração</td><td>Campos nulos tratados</td><td><span class="badge ok">OK</span></td><td>ISNULL aplicado em todos os 7 scripts</td></tr>
+        <tr><td>4</td><td>Transformação</td><td>Regras de negócio aplicadas</td><td><span class="badge ok">OK</span></td><td>20 indicadores cobertos nos 3 scripts</td></tr>
+        <tr><td>5</td><td>Transformação</td><td>Joins e relacionamentos validados</td><td><span class="badge ok">OK</span></td><td>ApplyMap — sem chaves sintéticas</td></tr>
+        <tr><td>6</td><td>Transformação</td><td>Duplicatas verificadas</td><td><span class="badge ok">OK</span></td><td>GROUP BY aplicado nas tabelas de resumo</td></tr>
+        <tr><td>7</td><td>Transformação</td><td>Tipos de dados corretos</td><td><span class="badge ok">OK</span></td><td>DATE, DECIMAL, VARCHAR conforme DDL</td></tr>
+        <tr><td>8</td><td>App Qlik</td><td>Modelo sem chaves sintéticas</td><td><span class="badge ok">OK</span></td><td>ApplyMap — modelo estrela sem loops</td></tr>
+        <tr><td>9</td><td>App Qlik</td><td>Indicadores conferidos</td><td><span class="badge parcial">Parcial</span></td><td>20 indicadores gerados — validar valores com usuário</td></tr>
+        <tr><td>10</td><td>App Qlik</td><td>Filtros funcionando</td><td><span class="badge pendente">Pendente</span></td><td>Validar após publicar no Qlik Sense</td></tr>
+        <tr><td>11</td><td>App Qlik</td><td>Gráficos exibindo dados corretos</td><td><span class="badge pendente">Pendente</span></td><td>Validar após publicar no Qlik Sense</td></tr>
+        <tr><td>12</td><td>App Qlik</td><td>Performance de carregamento</td><td><span class="badge pendente">Pendente</span></td><td>Testar após carga real</td></tr>
+        <tr><td>13</td><td>Entrega</td><td>Validação com usuário concluída</td><td><span class="badge pendente">Pendente</span></td><td>Agendar sessão UAT com Gerente Comercial</td></tr>
+        <tr><td>14</td><td>Entrega</td><td>Documentação atualizada</td><td><span class="badge parcial">Parcial</span></td><td>Docs técnicas geradas — falta doc final pós go-live</td></tr>
+        <tr><td>15</td><td>Entrega</td><td>Acesso de usuários configurado</td><td><span class="badge pendente">Pendente</span></td><td>Section Access mapeado — configurar no Qlik Cloud</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  SLIDE 7 — PRÓXIMOS PASSOS                       ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<section class="slide" id="slide-7">
+  <div class="slide-header">
+    <div>
+      <span class="slide-num">06</span>
+      <h2>Próximos Passos</h2>
+      <p>Roadmap para go-live — prioridade alta para produção</p>
+    </div>
+  </div>
+  <div class="slide-body">
+    <ul class="steps-list">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Validar conexão com SQL Server real</strong> — criar Data Connection Protheus_SQLServer no Qlik Cloud e testar SELECT em cada tabela</div>
+        <div class="step-owner">Analista de BI + DBA</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Executar reload completo com dados reais</strong> — main_load.inc → main_transform.inc — verificar QVDs gerados</div>
+        <div class="step-owner">Analista de BI</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Construir as 4 sheets no Qlik Sense</strong> — usando App/storytelling.md como especificação de cada objeto visual</div>
+        <div class="step-owner">Analista de BI</div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Sessão UAT com Gerente Comercial</strong> — validar os 20 indicadores com dados reais (usar App/roteiro_validacao_usuario.md)</div>
+        <div class="step-owner">Analista de BI + Gerente Comercial</div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-text"><strong>Corrigir divergências do UAT</strong> — ajustar scripts e fórmulas conforme feedback do negócio</div>
+        <div class="step-owner">Analista de BI</div>
+      </li>
+      <li>
+        <div class="step-num">6</div>
+        <div class="step-text"><strong>Configurar Section Access</strong> — criar grupos e mapear usuários no Qlik Cloud Management Console</div>
+        <div class="step-owner">Analista de BI</div>
+      </li>
+      <li>
+        <div class="step-num">7</div>
+        <div class="step-text"><strong>Agendar Reload Task diária às 6h</strong> — configurar no Qlik Cloud, ativar notificação de falha por e-mail</div>
+        <div class="step-owner">Analista de BI</div>
+      </li>
+      <li>
+        <div class="step-num">8</div>
+        <div class="step-text"><strong>Go-live e comunicação</strong> — comunicar equipe, realizar treinamento breve e documentar ata de validação</div>
+        <div class="step-owner">Gerente Comercial</div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  SLIDE FINAL — OBRIGADO                          ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<section class="slide" id="slide-final">
+  <h2>Obrigado!</h2>
+  <p>Performance Comercial · Qlik Sense · Entrega 2026-03-31</p>
+  <br/><br/>
+  <div class="capa-tags" style="justify-content:center">
+    <span class="tag">Dúvidas?</span>
+    <span class="tag">Validação com usuário — próximo passo</span>
+  </div>
+</section>
+
+<!-- ── Navegação ──────────────────────────────────────── -->
+<nav class="nav">
+  <button onclick="prevSlide()">← Anterior</button>
+  <span class="counter" id="counter">1 / 8</span>
+  <button onclick="nextSlide()">Próximo →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + slides.length;
+    window.scrollTo(0, 0);
+  }
+
+  function nextSlide() { showSlide(current + 1); }
+  function prevSlide() { showSlide(current - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevSlide();
+  });
+</script>
+</body>
+</html>
