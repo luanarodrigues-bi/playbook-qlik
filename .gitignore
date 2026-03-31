@@ -1,5 +1,7 @@
-# ── Claude Code ───────────────────────────────────────
-.claude/
+# ── Claude Code — ignorar apenas credenciais ──────────
+.claude/settings.json
+.claude/settings.local.json
+.claude/.claude.json
 
 # ── Credenciais e conexões ─────────────────────────────
 *.env
@@ -7,7 +9,7 @@
 secrets.json
 credentials.json
 config/credentials.*
-**/config/conexao.inc        # contém string de conexão ao BD
+**/config/conexao.inc
 **/config/*.pwd
 **/config/*.key
 
@@ -16,7 +18,6 @@ config/credentials.*
 *.qvd
 
 # ── Arquivos Office com dados reais ───────────────────
-# Manter apenas templates — ignorar se houver dados reais exportados
 **/exports/
 **/output/
 relatorio_exportado*.xlsx
